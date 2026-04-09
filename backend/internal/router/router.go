@@ -25,6 +25,15 @@ func SetupRouter() *gin.Engine {
 		auth.POST("/close", controller.CloseAccount)
 	}
 
+	note := r.Group("/note")
+	{
+		note.POST("/create", controller.CreateNote)
+		note.POST("/delete", controller.DeleteNote)
+		note.POST("/update", controller.UpdateNote)
+		note.GET("/list", controller.GetNoteList)
+		note.GET("/detail", controller.GetNoteDetail)
+	}
+
 	ws := r.Group("/ws")
 	{
 		ws.GET("/room", controller.RoomWS)
