@@ -20,10 +20,6 @@ type RoomHub struct {
 	mu    sync.Mutex
 }
 
-var Hub = &RoomHub{
-	rooms: make(map[string]map[uint]*websocket.Conn),
-}
-
 // Broadcast 把消息同时发给房间里的所有人
 func (h *RoomHub) Broadcast(roomID string, message interface{}) {
 	h.mu.Lock()
@@ -50,18 +46,5 @@ func RoomWS(c *gin.Context) {
 		if _, _, err := conn.ReadMessage(); err != nil {
 			break
 		}
-	}
-}
-
-func (h *RoomHub) CloseRoom(roomID string) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	if clients, ok := h.rooms[roomID]; ok {
-		for uid, conn := range clients {
-			_ = conn.Close()
-			delete(clients, uid)
-		}
-		delete(h.rooms, roomID)
 	}
 }
