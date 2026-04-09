@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
-import 'workspace_page.dart';
-import 'profile_page.dart';
+import 'package:provider/provider.dart';
+import 'models/user_provider.dart';
+import 'views/auth.dart';
+import 'views/workspace.dart';
+import 'views/profile.dart';
 
-void main() {
-  runApp(const MyApp());
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final userProvider = UserProvider();
+  await userProvider.init(); // 预加载 Token
+
+  runApp(
+    ChangeNotifierProvider.value(value: userProvider, child: const MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -11,54 +22,51 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userStore = Provider.of<UserProvider>(context);
+
     return MaterialApp(
-      title: 'EhcoLink',
-      home: const MyHomePage(),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      // 3. 模式跟随系统
+      navigatorKey: navigatorKey,
+      title: 'EchoLink',
       themeMode: ThemeMode.system,
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.deepPurple),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        colorSchemeSeed: Colors.deepPurple,
+      ),
+      // 如果已登录去首页，未登录去认证页
+      initialRoute: userStore.isLogin ? '/home' : '/auth',
+      routes: {
+        '/auth': (context) => const AuthPage(),
+        '/home': (context) => const MyHomePage(),
+      },
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
-
   final List<Widget> _pages = [const WorkspacePage(), const ProfilePage()];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(
+      body: IndexedStack(index: _currentIndex, children: _pages),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) => setState(() => _currentIndex = index),
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.auto_awesome_motion),
             label: '工作区',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: '我的',
-          ),
+          NavigationDestination(icon: Icon(Icons.person_outline), label: '我的'),
         ],
       ),
     );
