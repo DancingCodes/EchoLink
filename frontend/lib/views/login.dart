@@ -2,25 +2,25 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/http.dart';
-import '../models/user_provider.dart';
+import '../utils/toast.dart';
+import '../providers/user.dart';
 import '../models/user.dart';
 
-class AuthPage extends StatefulWidget {
-  const AuthPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
-  State<AuthPage> createState() => _AuthPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _AuthPageState extends State<AuthPage> {
+class _LoginPageState extends State<LoginPage> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
   void _doLogin() async {
     if (_phoneController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("手机号和密码不能为空")));
+      Tip.show("手机号和密码不能为空");
       return;
     }
 
@@ -46,7 +46,7 @@ class _AuthPageState extends State<AuthPage> {
         Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (e) {
-      debugPrint("登录失败详情: $e");
+      Tip.show("登录失败");
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -57,11 +57,8 @@ class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("登录 EchoLink"),
-        elevation: 0,
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text("登录 EchoLink"), centerTitle: true),
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: Column(
@@ -110,7 +107,6 @@ class _AuthPageState extends State<AuthPage> {
             ),
             TextButton(
               onPressed: () {
-                // 跳转到注册页
                 Navigator.pushNamed(context, '/register');
               },
               child: const Text("还没有账号？立即注册"),

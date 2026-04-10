@@ -2,12 +2,14 @@ import 'package:dio/dio.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
-import '../models/user_provider.dart';
+import '../providers/user.dart';
 import 'package:flutter/material.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class HttpClient {
-  static final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:10005'));
+  static final Dio _dio = Dio(
+    BaseOptions(baseUrl: 'http://192.168.110.146:10005'),
+  );
 
   static void _handleLogout() {
     final context = navigatorKey.currentContext;
