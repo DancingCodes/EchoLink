@@ -3,14 +3,35 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import '../models/user_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class HttpClient {
-  static final Dio _dio = Dio(
-    BaseOptions(
-      baseUrl: 'http://10.0.2.2:10005', // 模拟器用 10.0.2.2，真机用局域网 IP
-      connectTimeout: const Duration(seconds: 5),
-    ),
-  );
+  static final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:10005'));
+
+  static void _handleLogout() {
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      Provider.of<UserProvider>(context, listen: false).logout();
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        '/auth',
+        (route) => false,
+      );
+    }
+  }
+
+  static void _showError(String message) {
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 
   static bool _isInit = false;
 
@@ -27,26 +48,41 @@ class HttpClient {
             return handler.next(options);
           },
           onResponse: (response, handler) {
-            final int code = response.data['code'];
-            if (code == 401) {
-              // 登录失效逻辑
-              final context = navigatorKey.currentContext;
-              if (context != null) {
-                Provider.of<UserProvider>(context, listen: false).logout();
-                navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                  '/auth',
-                  (route) => false,
-                );
-              }
+            final data = response.data;
+            final int businessCode = data['code'] ?? 200;
+            final String msg = data['msg'] ?? "";
+
+            if (businessCode == 401) {
+              _handleLogout();
               return handler.reject(
                 DioException(
                   requestOptions: response.requestOptions,
-                  message: "登录过期",
+                  message: msg,
+                ),
+              );
+            }
+            if (businessCode == 500) {
+              _showError(msg);
+              return handler.reject(
+                DioException(
+                  requestOptions: response.requestOptions,
+                  message: msg,
+                  type: DioExceptionType.badResponse,
                 ),
               );
             }
             return handler.next(response);
           },
+        ),
+      );
+
+      _dio.interceptors.add(
+        PrettyDioLogger(
+          requestHeader: true,
+          requestBody: true,
+          responseBody: true,
+          responseHeader: false,
+          compact: false,
         ),
       );
       _isInit = true;

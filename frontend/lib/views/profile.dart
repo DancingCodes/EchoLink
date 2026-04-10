@@ -16,7 +16,7 @@ class ProfilePage extends StatelessWidget {
           children: [
             const CircleAvatar(radius: 40, child: Icon(Icons.person, size: 40)),
             const SizedBox(height: 10),
-            Text("当前用户: ${userStore.user?.username ?? '未知'}"),
+            Text("当前用户: ${userStore.user?.name ?? '未知'}"),
             const SizedBox(height: 30),
             ElevatedButton(
               style: ElevatedButton.styleFrom(

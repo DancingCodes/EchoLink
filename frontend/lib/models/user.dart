@@ -6,8 +6,8 @@ class UserModel {
   final String avatar;
 
   UserModel({
-    required this.id,
-    required this.phone,
+    this.id = 0,
+    this.phone = '',
     this.name = '',
     this.sex = '',
     this.avatar = '',
@@ -16,11 +16,11 @@ class UserModel {
   // 从 JSON 转换
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['ID'] ?? 0,
-      phone: json['phone'] ?? '',
-      name: json['name'] ?? '',
-      sex: json['sex'] ?? '',
-      avatar: json['avatar'] ?? '',
+      id: json['ID'],
+      phone: json['phone'],
+      name: json['name'],
+      sex: json['sex'],
+      avatar: json['avatar'],
     );
   }
 }

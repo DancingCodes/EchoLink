@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'models/user_provider.dart';
 import 'views/auth.dart';
+import 'views/register.dart';
 import 'views/workspace.dart';
 import 'views/profile.dart';
 
@@ -35,9 +36,10 @@ class MyApp extends StatelessWidget {
         colorSchemeSeed: Colors.deepPurple,
       ),
       // 如果已登录去首页，未登录去认证页
-      initialRoute: userStore.isLogin ? '/home' : '/auth',
+      initialRoute: userStore.token != null ? '/home' : '/auth',
       routes: {
         '/auth': (context) => const AuthPage(),
+        '/register': (context) => const RegisterPage(),
         '/home': (context) => const MyHomePage(),
       },
     );
