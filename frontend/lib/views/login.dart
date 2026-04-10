@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
       final userProvider = context.read<UserProvider>();
 
       await userProvider.setToken(data['token']);
-      userProvider.setUser(UserModel.fromJson(data['user']));
+      await userProvider.setUser(UserModel.fromJson(data['user']));
 
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/home');

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user.dart';
+import '../utils/toast.dart'; // 别忘了用你刚写的 Tip 工具
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-  // 弹窗确认退出
   void _confirmLogout(BuildContext context, UserProvider userStore) {
     showDialog(
       context: context,
@@ -15,16 +15,13 @@ class ProfilePage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("取消"),
+            child: const Text("取消", style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () async {
-              // 1. 执行 Provider 的退出逻辑
               await userStore.logout();
-              // 2. 关闭弹窗
-              if (context.mounted) Navigator.pop(ctx);
-              // 3. 跳转到登录页并清空路由栈（防止返回）
               if (context.mounted) {
+                Tip.show("已成功退出");
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/login',
@@ -32,7 +29,10 @@ class ProfilePage extends StatelessWidget {
                 );
               }
             },
-            child: const Text("退出", style: TextStyle(color: Colors.red)),
+            child: const Text(
+              "退出",
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -41,57 +41,112 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 建议 listen 设为 true，这样用户信息变化时 UI 会刷新
-    final userStore = Provider.of<UserProvider>(context);
+    final user = context.watch<UserProvider>().user;
+    final userStore = context.read<UserProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("个人中心")), // 加上 AppBar 更好看
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 头像回显逻辑
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.blue.shade100,
-              backgroundImage:
-                  (userStore.user?.avatar != null &&
-                      userStore.user!.avatar.isNotEmpty)
-                  ? NetworkImage(userStore.user!.avatar) // 如果后端返回了 URL
-                  : null,
-              child:
-                  (userStore.user?.avatar == null ||
-                      userStore.user!.avatar.isEmpty)
-                  ? const Icon(Icons.person, size: 50, color: Colors.blue)
-                  : null,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              "当前用户: ${userStore.user?.name ?? '未登录'}",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              "手机号: ${userStore.user?.phone ?? '---'}",
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 50),
-            SizedBox(
-              width: 200,
-              height: 45,
-              child: ElevatedButton.icon(
-                onPressed: () => _confirmLogout(context, userStore),
-                icon: const Icon(Icons.exit_to_app),
-                label: const Text("退出登录"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade50,
-                  foregroundColor: Colors.red,
-                  side: BorderSide(color: Colors.red.shade200),
-                  elevation: 0,
+      backgroundColor: Colors.grey[100], // 1. 页面底色设为浅灰
+      appBar: AppBar(
+        title: const Text("个人中心"),
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          // 2. 顶部头部卡片
+          Container(
+            color: Colors.white,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 30),
+            child: Column(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 45,
+                    backgroundColor: Colors.blue[50],
+                    backgroundImage:
+                        (user?.avatar != null && user!.avatar.isNotEmpty)
+                        ? NetworkImage(user.avatar)
+                        : null,
+                    child: (user?.avatar == null || user!.avatar.isEmpty)
+                        ? Icon(Icons.person, size: 45, color: Colors.blue[200])
+                        : null,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 15),
+                Text(
+                  user?.name ?? '未设置昵称',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  user?.phone ?? '---',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 15),
+
+          // 3. 菜单列表部分
+          Expanded(
+            child: ListView(
+              children: [
+                _buildMenuTile(Icons.security, "账号安全", () {}),
+                _buildMenuTile(Icons.notifications_none, "消息通知", () {}),
+                _buildMenuTile(Icons.help_outline, "帮助与反馈", () {}),
+                const SizedBox(height: 30),
+                // 退出登录按钮
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ElevatedButton(
+                    onPressed: () => _confirmLogout(context, userStore),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.red,
+                      elevation: 0,
+                      side: BorderSide(
+                        color: Colors.red.withValues(alpha: 0.3),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text("退出当前账号", style: TextStyle(fontSize: 16)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 抽离的列表项组件，方便复用
+  Widget _buildMenuTile(IconData icon, String title, VoidCallback onTap) {
+    return Container(
+      color: Colors.white,
+      child: ListTile(
+        leading: Icon(icon, color: Colors.blue[400], size: 22),
+        title: Text(title, style: const TextStyle(fontSize: 15)),
+        trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+        onTap: onTap,
       ),
     );
   }

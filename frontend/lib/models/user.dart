@@ -13,14 +13,23 @@ class UserModel {
     this.avatar = '',
   });
 
-  // 从 JSON 转换
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['ID'],
-      phone: json['phone'],
-      name: json['name'],
-      sex: json['sex'],
-      avatar: json['avatar'],
+      id: json['ID'] ?? 0,
+      phone: json['phone'] ?? '',
+      name: json['name'] ?? '',
+      sex: json['sex'] ?? '',
+      avatar: json['avatar'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'ID': id,
+      'phone': phone,
+      'name': name,
+      'sex': sex,
+      'avatar': avatar,
+    };
   }
 }

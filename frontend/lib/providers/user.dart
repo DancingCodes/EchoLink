@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
+import 'dart:convert';
 
 class UserProvider with ChangeNotifier {
   UserModel? _user;
@@ -23,8 +24,10 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setUser(UserModel user) {
+  Future<void> setUser(UserModel user) async {
     _user = user;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_info', jsonEncode(user.toJson()));
     notifyListeners();
   }
 

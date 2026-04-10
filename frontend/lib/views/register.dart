@@ -21,6 +21,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   File? _avatarFile;
   String? _uploadedAvatarUrl;
+  String? _sex;
   final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
 
@@ -83,6 +84,11 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
+    if (_sex == null) {
+      Tip.show("请选择性别");
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
@@ -95,6 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
           'phone': phone,
           'password': password,
           'avatar': _uploadedAvatarUrl,
+          'sex': _sex,
         },
       );
 
@@ -180,6 +187,30 @@ class _RegisterPageState extends State<RegisterPage> {
                   prefixIcon: Icon(Icons.lock_outline),
                   border: OutlineInputBorder(),
                 ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  const Icon(Icons.wc, color: Colors.grey, size: 22),
+                  const SizedBox(width: 12),
+                  const Text("性别：", style: TextStyle(fontSize: 16)),
+                  const SizedBox(width: 10),
+                  ChoiceChip(
+                    label: const Text("男"),
+                    selected: _sex == '男',
+                    onSelected: (bool selected) {
+                      setState(() => _sex = selected ? '男' : null);
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  ChoiceChip(
+                    label: const Text("女"),
+                    selected: _sex == '女',
+                    onSelected: (bool selected) {
+                      setState(() => _sex = selected ? '女' : null);
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 40),
               SizedBox(
