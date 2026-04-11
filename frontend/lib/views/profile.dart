@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user.dart';
-import '../utils/toast.dart'; // 别忘了用你刚写的 Tip 工具
+import '../utils/toast.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -45,108 +45,118 @@ class ProfilePage extends StatelessWidget {
     final userStore = context.read<UserProvider>();
 
     return Scaffold(
-      backgroundColor: Colors.grey[100], // 1. 页面底色设为浅灰
+      backgroundColor: Colors.white, // 改为纯白背景，更简约
       appBar: AppBar(
         title: const Text("个人中心"),
         elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          // 2. 顶部头部卡片
-          Container(
-            color: Colors.white,
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 30),
-            child: Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 4),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        spreadRadius: 2,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
+            // --- 上部分：个人信息展示 ---
+            Center(
+              child: Column(
+                children: [
+                  // 头像
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.blue.withValues(alpha: 0.1),
+                        width: 5,
                       ),
-                    ],
-                  ),
-                  child: CircleAvatar(
-                    radius: 45,
-                    backgroundColor: Colors.blue[50],
-                    backgroundImage:
-                        (user?.avatar != null && user!.avatar.isNotEmpty)
-                        ? NetworkImage(user.avatar)
-                        : null,
-                    child: (user?.avatar == null || user!.avatar.isEmpty)
-                        ? Icon(Icons.person, size: 45, color: Colors.blue[200])
-                        : null,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  user?.name ?? '未设置昵称',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  user?.phone ?? '---',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 15),
-
-          // 3. 菜单列表部分
-          Expanded(
-            child: ListView(
-              children: [
-                _buildMenuTile(Icons.security, "账号安全", () {}),
-                _buildMenuTile(Icons.notifications_none, "消息通知", () {}),
-                _buildMenuTile(Icons.help_outline, "帮助与反馈", () {}),
-                const SizedBox(height: 30),
-                // 退出登录按钮
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: ElevatedButton(
-                    onPressed: () => _confirmLogout(context, userStore),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.red,
-                      elevation: 0,
-                      side: BorderSide(
-                        color: Colors.red.withValues(alpha: 0.3),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text("退出当前账号", style: TextStyle(fontSize: 16)),
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.blue[50],
+                      backgroundImage:
+                          (user?.avatar != null && user!.avatar.isNotEmpty)
+                          ? NetworkImage(user.avatar)
+                          : null,
+                      child: (user?.avatar == null || user!.avatar.isEmpty)
+                          ? Icon(
+                              Icons.person,
+                              size: 50,
+                              color: Colors.blue[200],
+                            )
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // 名称
+                  Text(
+                    user?.name ?? '未设置昵称',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // 手机号
+                  Text(
+                    user?.phone ?? '---',
+                    style: TextStyle(color: Colors.grey[500], fontSize: 15),
+                  ),
+                  const SizedBox(height: 25),
+                  // 修改资料按钮
+                  SizedBox(
+                    width: 120,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Tip.show("功能开发中");
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: StadiumBorder(), // 圆角矩形
+                        side: BorderSide(
+                          color: Colors.blue.withValues(alpha: 0.5),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      child: const Text("修改资料", style: TextStyle(fontSize: 14)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // --- 中间：填充空白 ---
+            const Spacer(),
+
+            // --- 下部分：退出登录 ---
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 30),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: TextButton.icon(
+                    onPressed: () => _confirmLogout(context, userStore),
+                    icon: const Icon(Icons.logout_rounded, color: Colors.red),
+                    label: const Text(
+                      "退出登录",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.red.withValues(alpha: 0.05),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 抽离的列表项组件，方便复用
-  Widget _buildMenuTile(IconData icon, String title, VoidCallback onTap) {
-    return Container(
-      color: Colors.white,
-      child: ListTile(
-        leading: Icon(icon, color: Colors.blue[400], size: 22),
-        title: Text(title, style: const TextStyle(fontSize: 15)),
-        trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
-        onTap: onTap,
+          ],
+        ),
       ),
     );
   }
